@@ -130,7 +130,7 @@ Remember: Only work with what exists in the resume. Do not invent anything.`
 
     if (!response.ok) {
       const errorData = await response.text()
-      console.error("[v0] Groq API error:", errorData)
+      console.error("Groq API error:", errorData)
       throw new Error(`Groq API error: ${response.status}`)
     }
 
@@ -143,7 +143,7 @@ Remember: Only work with what exists in the resume. Do not invent anything.`
 
     return Response.json(validatedObject)
   } catch (error) {
-    console.error("[v0] Tailor API error:", error)
+    console.error("Tailor API error:", error)
     return Response.json({ error: "Failed to analyze job description. Please try again." }, { status: 500 })
   }
 }
