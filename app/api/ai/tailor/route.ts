@@ -1,5 +1,3 @@
-import { openai } from "@ai-sdk/openai"
-import { generateObject } from "ai"
 import { z } from "zod"
 import type { ResumeData } from "@/lib/types"
 
@@ -40,9 +38,9 @@ export async function POST(req: Request) {
       return Response.json({ error: "Job description is required" }, { status: 400 })
     }
 
-    if (!process.env.OPENAI_API_KEY) {
+    if (!process.env.GROQ_API_KEY) {
       return Response.json(
-        { error: "OPENAI_API_KEY environment variable is not configured. Please add it to use AI features." },
+        { error: "GROQ_API_KEY environment variable is not configured. Please add it to use AI features." },
         { status: 500 },
       )
     }
@@ -67,15 +65,7 @@ export async function POST(req: Request) {
         [],
     }
 
-    const { object } = await generateObject({
-      model: openai("gpt-4o", {
-        apiKey: process.env.OPENAI_API_KEY,
-      }),
-      schema: tailorResultsSchema,
-      messages: [
-        {
-          role: "system",
-          content: `You are an expert resume optimization assistant. Your role is to help users tailor their resume to specific job descriptions.
+    const systemPrompt = `You are an expert resume optimization assistant. Your role is to help users tailor their resume to specific job descriptions.
 
 STRICT RULES:
 1. NEVER invent experience, metrics, or accomplishments that aren't in the original resume
@@ -86,11 +76,23 @@ STRICT RULES:
 6. If suggesting bullet improvements, provide exactly 3 alternatives per bullet
 7. Identify missing keywords that could naturally fit based on existing experience
 
-Your goal is to help the user present their REAL experience in the most effective way for the target role.`,
-        },
-        {
-          role: "user",
-          content: `Job Description:
+Your goal is to help the user present their REAL experience in the most effective way for the target role.
+
+You must respond with valid JSON matching this exact structure:
+{
+  "missing_keywords": ["keyword1", "keyword2", ...],
+  "summary_suggestion": "A tailored summary based on existing resume content",
+  "bullet_suggestions": [
+    {
+      "section": "experience" or "projects",
+      "itemIndex": 0,
+      "bulletIndex": 0,
+      "suggestions": ["suggestion1", "suggestion2", "suggestion3"]
+    }
+  ]
+}`
+
+    const userPrompt = `Job Description:
 ${jobDescription}
 
 Current Resume:
@@ -101,12 +103,45 @@ Analyze the resume against this job description and provide:
 2. A tailored summary that highlights relevant existing experience
 3. Suggestions for 2-3 bullet points that could be reframed to better match the job (choose the most impactful ones)
 
-Remember: Only work with what exists in the resume. Do not invent anything.`,
-        },
-      ],
+Remember: Only work with what exists in the resume. Do not invent anything.`
+
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [
+          {
+            role: "system",
+            content: systemPrompt,
+          },
+          {
+            role: "user",
+            content: userPrompt,
+          },
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.7,
+      }),
     })
 
-    return Response.json(object)
+    if (!response.ok) {
+      const errorData = await response.text()
+      console.error("[v0] Groq API error:", errorData)
+      throw new Error(`Groq API error: ${response.status}`)
+    }
+
+    const data = await response.json()
+    const content = data.choices[0]?.message?.content || "{}"
+    const parsedObject = JSON.parse(content)
+
+    // Validate with zod schema
+    const validatedObject = tailorResultsSchema.parse(parsedObject)
+
+    return Response.json(validatedObject)
   } catch (error) {
     console.error("[v0] Tailor API error:", error)
     return Response.json({ error: "Failed to analyze job description. Please try again." }, { status: 500 })
