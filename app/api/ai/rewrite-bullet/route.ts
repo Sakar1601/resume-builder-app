@@ -1,5 +1,3 @@
-import { generateText } from "ai"
-import { openai } from "@ai-sdk/openai"
 import { NextResponse } from "next/server"
 import { z } from "zod"
 
@@ -18,10 +16,9 @@ const TONE_INSTRUCTIONS = {
 
 export async function POST(req: Request) {
   try {
-    // Check for API key
-    if (!process.env.OPENAI_API_KEY) {
+    if (!process.env.GROQ_API_KEY) {
       return NextResponse.json(
-        { error: "OPENAI_API_KEY is not configured. Please add it to your environment variables." },
+        { error: "GROQ_API_KEY is not configured. Please add it to your environment variables." },
         { status: 500 },
       )
     }
@@ -49,20 +46,39 @@ CRITICAL RULES:
 
 Return EXACTLY 3 rewritten versions, each on a new line, without numbering or bullet points.`
 
-    const { text } = await generateText({
-      model: openai("gpt-4o-mini", {
-        apiKey: process.env.OPENAI_API_KEY,
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        max_tokens: 500,
+        temperature: 0.8,
       }),
-      prompt,
-      maxOutputTokens: 500,
-      temperature: 0.8,
     })
+
+    if (!response.ok) {
+      const errorData = await response.text()
+      console.error("[v0] Groq API error:", errorData)
+      throw new Error(`Groq API error: ${response.status}`)
+    }
+
+    const data = await response.json()
+    const text = data.choices[0]?.message?.content || ""
 
     // Parse the response into 3 suggestions
     const suggestions = text
       .split("\n")
-      .map((line) => line.trim())
-      .filter((line) => line.length > 0)
+      .map((line: string) => line.trim())
+      .filter((line: string) => line.length > 0)
       .slice(0, 3)
 
     // Ensure we have exactly 3 suggestions
