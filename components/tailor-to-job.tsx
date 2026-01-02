@@ -62,7 +62,7 @@ export function TailorToJob({ data, updateData }: TailorToJobProps) {
       const tailorResults = await response.json()
       setResults(tailorResults)
     } catch (err) {
-      console.error("Tailor error:", err)
+      console.error("[v0] Tailor error:", err)
       setError(err instanceof Error ? err.message : "Failed to analyze job description")
     } finally {
       setIsAnalyzing(false)

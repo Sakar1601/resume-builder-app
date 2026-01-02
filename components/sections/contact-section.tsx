@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import type { ResumeData } from "@/lib/types"
+import { SectionGuidance } from "@/components/section-guidance"
 
 interface ContactSectionProps {
   data: ResumeData
@@ -34,34 +35,51 @@ export function ContactSection({ data, updateData }: ContactSectionProps) {
         <CardDescription>Your personal contact details</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        <SectionGuidance
+          tips={[
+            "Use a professional email address",
+            "Include your city and state for location relevance",
+            "LinkedIn and GitHub URLs boost credibility",
+          ]}
+        />
+
         <div className="grid gap-2">
-          <Label htmlFor="name">Full Name</Label>
+          <Label htmlFor="name" className="flex items-center gap-1">
+            Full Name <span className="text-destructive">*</span>
+          </Label>
           <Input
             id="name"
             value={contact.name}
             onChange={(e) => handleChange("name", e.target.value)}
             placeholder="John Doe"
+            className={!contact.name ? "border-amber-300 focus-visible:ring-amber-400" : ""}
           />
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email" className="flex items-center gap-1">
+            Email <span className="text-destructive">*</span>
+          </Label>
           <Input
             id="email"
             type="email"
             value={contact.email}
             onChange={(e) => handleChange("email", e.target.value)}
             placeholder="john@example.com"
+            className={!contact.email ? "border-amber-300 focus-visible:ring-amber-400" : ""}
           />
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="phone">Phone</Label>
+          <Label htmlFor="phone" className="flex items-center gap-1">
+            Phone <span className="text-destructive">*</span>
+          </Label>
           <Input
             id="phone"
             value={contact.phone}
             onChange={(e) => handleChange("phone", e.target.value)}
             placeholder="+1 (555) 123-4567"
+            className={!contact.phone ? "border-amber-300 focus-visible:ring-amber-400" : ""}
           />
         </div>
 

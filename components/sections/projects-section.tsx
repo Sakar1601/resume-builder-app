@@ -9,6 +9,7 @@ import { Plus, Trash2, ChevronUp, ChevronDown, Sparkles } from "lucide-react"
 import type { ResumeData, ProjectItem } from "@/lib/types"
 import { BulletRewriterModal } from "@/components/bullet-rewriter-modal"
 import { useState } from "react"
+import { SectionGuidance } from "@/components/section-guidance"
 
 interface ProjectsSectionProps {
   data: ResumeData
@@ -118,8 +119,24 @@ export function ProjectsSection({ data, updateData }: ProjectsSectionProps) {
           <CardDescription>Showcase your personal or professional projects</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <SectionGuidance
+            tips={[
+              "Include projects that demonstrate relevant skills",
+              "Mention the tech stack used",
+              "Highlight user impact or business value",
+              "Add links to live demos or GitHub repos",
+            ]}
+            examples={[
+              "Built full-stack e-commerce platform serving 10K+ users with 99.9% uptime",
+              "Developed Chrome extension with 500+ active users and 4.8-star rating",
+            ]}
+          />
+
           {projects.map((item, index) => (
-            <div key={item.id} className="space-y-3 p-4 border rounded-lg">
+            <div
+              key={item.id}
+              className="space-y-3 p-4 border rounded-lg bg-card hover:border-primary/30 transition-colors"
+            >
               <div className="flex items-start justify-between gap-2">
                 <h4 className="font-medium">Project #{index + 1}</h4>
                 <div className="flex items-center gap-1">
@@ -169,16 +186,16 @@ export function ProjectsSection({ data, updateData }: ProjectsSectionProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Description</Label>
+                  <Label>Description & Impact</Label>
                   {item.bullets.map((bullet, bulletIndex) => (
                     <div key={bulletIndex} className="space-y-2">
                       <div className="flex gap-2">
                         <Textarea
                           value={bullet}
                           onChange={(e) => updateBullet(item.id, bulletIndex, e.target.value)}
-                          placeholder="Describe what the project does or your contribution"
-                          rows={2}
-                          className="flex-1"
+                          placeholder="Describe what the project does and the impact it created..."
+                          rows={3}
+                          className="flex-1 leading-relaxed"
                         />
                         <Button
                           variant="ghost"

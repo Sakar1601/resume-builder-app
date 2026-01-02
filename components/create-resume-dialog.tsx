@@ -16,8 +16,13 @@ import { Plus } from "lucide-react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
+import { createGuestResume } from "@/lib/guest-session"
 
-export function CreateResumeDialog() {
+interface CreateResumeDialogProps {
+  isGuest?: boolean
+}
+
+export function CreateResumeDialog({ isGuest = false }: CreateResumeDialogProps) {
   const [open, setOpen] = useState(false)
   const [title, setTitle] = useState("")
   const [template, setTemplate] = useState("modern")
@@ -28,6 +33,20 @@ export function CreateResumeDialog() {
     if (!title.trim()) return
 
     setIsLoading(true)
+
+    // Guest mode: create resume in localStorage
+    if (isGuest) {
+      const resume = createGuestResume(title.trim())
+      setOpen(false)
+      setTitle("")
+      setIsLoading(false)
+      router.push(`/guest/resume/${resume.id}`)
+      // Trigger custom event for same-tab updates
+      window.dispatchEvent(new Event("guest-resumes-updated"))
+      return
+    }
+
+    // Regular mode: create resume in database
     const supabase = createClient()
 
     const {
@@ -90,19 +109,21 @@ export function CreateResumeDialog() {
               }}
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="template">Template</Label>
-            <select
-              id="template"
-              value={template}
-              onChange={(e) => setTemplate(e.target.value)}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            >
-              <option value="modern">Modern</option>
-              <option value="classic">Classic</option>
-              <option value="minimal">Minimal</option>
-            </select>
-          </div>
+          {!isGuest && (
+            <div className="space-y-2">
+              <Label htmlFor="template">Template</Label>
+              <select
+                id="template"
+                value={template}
+                onChange={(e) => setTemplate(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                <option value="modern">Modern</option>
+                <option value="classic">Classic</option>
+                <option value="minimal">Minimal</option>
+              </select>
+            </div>
+          )}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)} disabled={isLoading}>

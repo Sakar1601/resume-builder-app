@@ -53,6 +53,13 @@ export default function SignUpPage() {
     }
   }
 
+  const handleGuestMode = () => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("guest_session", "true")
+      router.push("/guest/dashboard")
+    }
+  }
+
   return (
     <div className="flex min-h-screen w-full items-center justify-center p-6 md:p-10 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900">
       <div className="w-full max-w-sm">
@@ -114,6 +121,19 @@ export default function SignUpPage() {
                   {error && <p className="text-sm text-destructive">{error}</p>}
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? "Creating account..." : "Create Account"}
+                  </Button>
+
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-background px-2 text-muted-foreground">Or</span>
+                    </div>
+                  </div>
+
+                  <Button type="button" variant="outline" className="w-full bg-transparent" onClick={handleGuestMode}>
+                    Continue as Guest
                   </Button>
                 </div>
                 <div className="mt-4 text-center text-sm">
