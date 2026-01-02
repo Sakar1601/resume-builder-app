@@ -67,7 +67,7 @@ Return EXACTLY 3 rewritten versions, each on a new line, without numbering or bu
 
     if (!response.ok) {
       const errorData = await response.text()
-      console.error("[v0] Groq API error:", errorData)
+      console.error("Groq API error:", errorData)
       throw new Error(`Groq API error: ${response.status}`)
     }
 
@@ -88,7 +88,7 @@ Return EXACTLY 3 rewritten versions, each on a new line, without numbering or bu
 
     return NextResponse.json({ suggestions })
   } catch (error) {
-    console.error("[v0] Error in rewrite-bullet API:", error)
+    console.error("Error in rewrite-bullet API:", error)
 
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: "Invalid request data", details: error.errors }, { status: 400 })

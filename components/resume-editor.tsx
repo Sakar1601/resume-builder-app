@@ -72,7 +72,7 @@ export function ResumeEditor({ resume: initialResume, isGuest = false }: ResumeE
           setError(null)
           setTimeout(() => setSaveStatus("idle"), 2000)
         } catch (err) {
-          console.error("[v0] Save error:", err)
+          console.error("Save error:", err)
           setError("Failed to save changes")
           setSaveStatus("idle")
         }
