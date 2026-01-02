@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Plus, Trash2 } from "lucide-react"
 import type { ResumeData, SkillCategory } from "@/lib/types"
+import { SectionGuidance } from "@/components/section-guidance"
 
 interface SkillsEditorSectionProps {
   data: ResumeData
@@ -48,8 +49,24 @@ export function SkillsEditorSection({ data, updateData }: SkillsEditorSectionPro
         <CardDescription>Organize your skills by category</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        <SectionGuidance
+          tips={[
+            "Group similar skills together (e.g., Languages, Frameworks, Tools)",
+            "List most important skills first in each category",
+            "Include both technical and soft skills where relevant",
+          ]}
+          examples={[
+            "Programming Languages: JavaScript, Python, Java, C++",
+            "Frameworks: React, Next.js, Express, Django",
+            "Tools: Git, Docker, AWS, Figma",
+          ]}
+        />
+
         {skills.map((category) => (
-          <div key={category.id} className="space-y-3 p-4 border rounded-lg">
+          <div
+            key={category.id}
+            className="space-y-3 p-4 border rounded-lg bg-card hover:border-primary/30 transition-colors"
+          >
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 space-y-3">
                 <div className="grid gap-2">

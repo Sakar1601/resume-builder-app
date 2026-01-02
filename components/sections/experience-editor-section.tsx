@@ -9,6 +9,7 @@ import { Plus, Trash2, ChevronUp, ChevronDown, Sparkles } from "lucide-react"
 import type { ResumeData, ExperienceItem } from "@/lib/types"
 import { BulletRewriterModal } from "@/components/bullet-rewriter-modal"
 import { useState } from "react"
+import { SectionGuidance } from "@/components/section-guidance"
 
 interface ExperienceEditorSectionProps {
   data: ResumeData
@@ -120,8 +121,24 @@ export function ExperienceEditorSection({ data, updateData }: ExperienceEditorSe
           <CardDescription>Your professional work history</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <SectionGuidance
+            tips={[
+              "Start each bullet with a strong action verb (Led, Built, Improved, Achieved)",
+              "Include quantifiable results when possible (increased by 40%, saved 10 hours/week)",
+              "Focus on impact and results, not just responsibilities",
+              "List 3-5 bullets per position",
+            ]}
+            examples={[
+              "Led team of 5 engineers to deliver new feature, increasing user engagement by 35%",
+              "Optimized database queries reducing page load time from 3s to 800ms",
+            ]}
+          />
+
           {experience.map((item, index) => (
-            <div key={item.id} className="space-y-3 p-4 border rounded-lg">
+            <div
+              key={item.id}
+              className="space-y-3 p-4 border rounded-lg bg-card hover:border-primary/30 transition-colors"
+            >
               <div className="flex items-start justify-between gap-2">
                 <h4 className="font-medium">Experience #{index + 1}</h4>
                 <div className="flex items-center gap-1">
@@ -195,16 +212,16 @@ export function ExperienceEditorSection({ data, updateData }: ExperienceEditorSe
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Responsibilities</Label>
+                  <Label>Responsibilities & Achievements</Label>
                   {item.bullets.map((bullet, bulletIndex) => (
                     <div key={bulletIndex} className="space-y-2">
                       <div className="flex gap-2">
                         <Textarea
                           value={bullet}
                           onChange={(e) => updateBullet(item.id, bulletIndex, e.target.value)}
-                          placeholder="Describe your achievement or responsibility"
-                          rows={2}
-                          className="flex-1"
+                          placeholder="Led development of... • Achieved X% improvement in... • Built feature that..."
+                          rows={3}
+                          className="flex-1 leading-relaxed"
                         />
                         <Button
                           variant="ghost"
