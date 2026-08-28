@@ -53,7 +53,7 @@ export function AppScreenshotTailor() {
                 <div className="flex-1">
                   <p className="text-xs text-muted-foreground mb-1">Experience • Bullet #2</p>
                   <p className="text-sm">
-                    Highlight API design experience: "Designed and implemented RESTful APIs serving 1M+ requests/day"
+                    Highlight API design experience: &quot;Designed and implemented RESTful APIs serving 1M+ requests/day&quot;
                   </p>
                 </div>
                 <Button size="sm" variant="outline" className="ml-2 h-7 text-xs bg-transparent">

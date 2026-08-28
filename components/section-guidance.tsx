@@ -44,7 +44,7 @@ export function SectionGuidance({ tips, examples }: SectionGuidanceProps) {
               <ul className="space-y-1">
                 {examples.map((example, i) => (
                   <li key={i} className="text-muted-foreground italic text-xs">
-                    "{example}"
+                    &quot;{example}&quot;
                   </li>
                 ))}
               </ul>
