@@ -14,7 +14,10 @@ export default defineConfig({
     // alone take longer than a single generous webServer timeout should need to.
     command: "npm start",
     url: "http://localhost:3000",
-    reuseExistingServer: !process.env.CI,
+    // Always reuse: locally this starts a fresh server since none is running yet;
+    // in CI the workflow already started + health-checked one in a prior step
+    // (so failures show real server logs instead of Playwright's opaque timeout).
+    reuseExistingServer: true,
     timeout: 60_000,
   },
 })
