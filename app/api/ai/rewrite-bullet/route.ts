@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
+import { checkRateLimit, getClientKey } from "@/lib/rate-limit"
+import { logAICall } from "@/lib/ai-log"
+import { GROQ_MODEL } from "@/lib/groq"
+
+const RATE_LIMIT_PER_MINUTE = 10
 
 const requestSchema = z.object({
-  bullet: z.string().min(1),
+  bullet: z.string().min(1).max(1000),
   tone: z.enum(["impact", "concise", "technical"]),
-  targetRole: z.string().optional(),
+  targetRole: z.string().max(200).optional(),
 })
 
 const TONE_INSTRUCTIONS = {
@@ -15,7 +20,17 @@ const TONE_INSTRUCTIONS = {
 }
 
 export async function POST(req: Request) {
+  const startTime = Date.now()
+
   try {
+    const { allowed, retryAfterSeconds } = checkRateLimit(getClientKey(req), RATE_LIMIT_PER_MINUTE)
+    if (!allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Please wait a moment before trying again." },
+        { status: 429, headers: { "Retry-After": String(retryAfterSeconds) } },
+      )
+    }
+
     if (!process.env.GROQ_API_KEY) {
       return NextResponse.json(
         { error: "GROQ_API_KEY is not configured. Please add it to your environment variables." },
@@ -53,7 +68,7 @@ Return EXACTLY 3 rewritten versions, each on a new line, without numbering or bu
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
+        model: GROQ_MODEL,
         messages: [
           {
             role: "user",
@@ -83,16 +98,41 @@ Return EXACTLY 3 rewritten versions, each on a new line, without numbering or bu
 
     // Ensure we have exactly 3 suggestions
     if (suggestions.length < 3) {
+      logAICall({
+        route: "rewrite-bullet",
+        model: GROQ_MODEL,
+        latencyMs: Date.now() - startTime,
+        outcome: "malformed_output",
+      })
       throw new Error("AI did not return 3 suggestions")
     }
 
+    logAICall({
+      route: "rewrite-bullet",
+      model: GROQ_MODEL,
+      latencyMs: Date.now() - startTime,
+      promptTokens: data.usage?.prompt_tokens,
+      completionTokens: data.usage?.completion_tokens,
+      outcome: "success",
+    })
+
     return NextResponse.json({ suggestions })
   } catch (error) {
-    console.error("Error in rewrite-bullet API:", error)
-
+    logAICall({
+      route: "rewrite-bullet",
+      model: GROQ_MODEL,
+      latencyMs: Date.now() - startTime,
+      outcome: "error",
+    })
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: "Invalid request data", details: error.errors }, { status: 400 })
+      // Log the flattened issue list, not the raw ZodError — passing the error
+      // instance itself to console.error crashes under Node 24 (its getters trip
+      // up util.inspect: "Cannot read properties of undefined (reading 'value')").
+      console.error("Error in rewrite-bullet API: invalid request data", error.issues)
+      return NextResponse.json({ error: "Invalid request data", details: error.issues }, { status: 400 })
     }
+
+    console.error("Error in rewrite-bullet API:", error instanceof Error ? error.message : error)
 
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 500 })

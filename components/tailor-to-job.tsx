@@ -56,6 +56,9 @@ export function TailorToJob({ data, updateData }: TailorToJobProps) {
 
       if (!response.ok) {
         const errorData = await response.json()
+        if (response.status === 429) {
+          throw new Error("You've hit the rate limit for job tailoring. Wait about a minute and try again.")
+        }
         throw new Error(errorData.error || "Failed to analyze job description")
       }
 

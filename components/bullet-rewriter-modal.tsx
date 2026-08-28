@@ -55,6 +55,9 @@ export function BulletRewriterModal({ open, onOpenChange, originalBullet, onSele
 
       if (!response.ok) {
         const error = await response.json()
+        if (response.status === 429) {
+          throw new Error("You've hit the rate limit for AI rewrites. Wait about a minute and try again.")
+        }
         throw new Error(error.error || "Failed to generate suggestions")
       }
 
