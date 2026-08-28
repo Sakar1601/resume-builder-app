@@ -39,14 +39,14 @@ A modern, AI-powered resume builder application built with Next.js, TypeScript, 
 - **Row Level Security (RLS)**: Database-level access control
 
 ### AI Integration
-- **AI SDK**: Unified interface for AI providers
-- **Groq**: Fast inference for AI-powered features
-- **OpenAI**: Fallback AI provider
+- **Groq**: `openai/gpt-oss-120b` via direct REST calls, used for bullet rewriting and job tailoring
+- Zod-validated structured output on the tailoring endpoint, with one automatic retry on malformed model output
+- Per-client rate limiting and input-length caps on both AI routes
 
 ### Development Tools
 - **ESLint**: Code linting
 - **PostCSS**: CSS processing
-- **pnpm**: Package management
+- **npm**: Package management
 - **Vercel Analytics**: Usage tracking
 
 ## Architecture
@@ -77,8 +77,7 @@ lib/
 ```
 
 ### Database Schema
-- **resumes**: Stores resume metadata and user ownership
-- **resume_sections**: Stores individual resume sections as JSONB
+- **resumes**: Stores resume metadata, ownership, and content (as a `data` jsonb column)
 - **profiles**: User profile information
 
 ### Authentication Flow
@@ -93,7 +92,7 @@ lib/
 
 ### Prerequisites
 - Node.js 18+
-- pnpm package manager
+- npm
 - Supabase account and project
 
 ### Installation
@@ -106,7 +105,7 @@ cd resume-builder-app
 
 2. Install dependencies:
 ```bash
-pnpm install
+npm install
 ```
 
 3. Set up environment variables:
@@ -114,10 +113,9 @@ Create a `.env.local` file with:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 GROQ_API_KEY=your-groq-api-key
-OPENAI_API_KEY=your-openai-api-key
 ```
+`.env.local` is gitignored — never commit it. The app doesn't use the Supabase service-role key; all database access goes through the anon key and is enforced by Postgres Row Level Security.
 
 4. Set up the database:
 Run the SQL scripts in the `scripts/` directory in order:
@@ -126,13 +124,21 @@ Run the SQL scripts in the `scripts/` directory in order:
 - `003_create_profiles_table.sql`
 - `004_create_profile_trigger.sql`
 - `005_add_data_column_to_resumes.sql`
+- `006_drop_unused_resume_sections.sql` — drops `resume_sections`; the app stores resume content in `resumes.data` (jsonb) instead, so this table went unused after migration 005.
 
 5. Start the development server:
 ```bash
-pnpm dev
+npm run dev
 ```
 
 6. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Testing
+
+```bash
+npm test
+```
+Runs the Vitest suite: request-validation and rate-limiting behavior for both AI routes, the malformed-output retry path, and an authorization test for the resume-ownership check on the edit page.
 
 ## Usage
 

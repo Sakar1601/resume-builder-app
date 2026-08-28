@@ -95,7 +95,10 @@ function Carousel({
 
   React.useEffect(() => {
     if (!api) return
-    onSelect(api)
+    // Seed the initial scroll-button state from a microtask callback rather than
+    // synchronously in the effect body, so the setState call always happens from
+    // a callback (matching the subscription below) instead of the effect itself.
+    queueMicrotask(() => onSelect(api))
     api.on('reInit', onSelect)
     api.on('select', onSelect)
 

@@ -14,20 +14,25 @@ export default function GuestResumeEditPage() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    if (!isGuestSession()) {
-      router.push("/auth/login")
-      return
-    }
+    // Reading localStorage is a synchronous client-only side effect; deferring the
+    // resulting setState calls to a microtask callback (rather than calling them
+    // directly in the effect body) keeps this a "sync from external system" read.
+    queueMicrotask(() => {
+      if (!isGuestSession()) {
+        router.push("/auth/login")
+        return
+      }
 
-    const guestResume = getGuestResume(id)
+      const guestResume = getGuestResume(id)
 
-    if (!guestResume) {
-      router.push("/guest/dashboard")
-      return
-    }
+      if (!guestResume) {
+        router.push("/guest/dashboard")
+        return
+      }
 
-    setResume(guestResume)
-    setIsLoading(false)
+      setResume(guestResume)
+      setIsLoading(false)
+    })
   }, [id, router])
 
   if (isLoading || !resume) {

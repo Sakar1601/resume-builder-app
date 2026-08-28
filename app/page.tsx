@@ -3,17 +3,20 @@
 import type React from "react"
 
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { FileText, Zap, Download, Sparkles, Eye, Target, ArrowRight, Check, Edit3, FileCheck } from "lucide-react"
 import { motion, useReducedMotion } from "framer-motion"
 import { useInView } from "framer-motion"
+import type { Variants } from "framer-motion"
 import { useRef } from "react"
+import { setGuestSession } from "@/lib/guest-session"
 import { AppScreenshotHero } from "@/components/landing/app-screenshot-hero"
 import { AppScreenshotEditor } from "@/components/landing/app-screenshot-editor"
 import { AppScreenshotAI } from "@/components/landing/app-screenshot-ai"
 import { AppScreenshotTailor } from "@/components/landing/app-screenshot-tailor"
 
-const heroStagger = {
+const heroStagger: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -24,7 +27,7 @@ const heroStagger = {
   },
 }
 
-const heroItem = {
+const heroItem: Variants = {
   hidden: { opacity: 0, y: 40 },
   visible: {
     opacity: 1,
@@ -37,7 +40,7 @@ const heroItem = {
   },
 }
 
-const heroButton = {
+const heroButton: Variants = {
   hidden: { opacity: 0, scale: 0.9 },
   visible: {
     opacity: 1,
@@ -50,7 +53,7 @@ const heroButton = {
   },
 }
 
-const fadeInUp = {
+const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 40 },
   visible: {
     opacity: 1,
@@ -63,7 +66,7 @@ const fadeInUp = {
   },
 }
 
-const staggerContainer = {
+const staggerContainer: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -74,7 +77,7 @@ const staggerContainer = {
   },
 }
 
-const scaleIn = {
+const scaleIn: Variants = {
   hidden: { opacity: 0, scale: 0.9 },
   visible: {
     opacity: 1,
@@ -87,7 +90,7 @@ const scaleIn = {
   },
 }
 
-const parallaxItem = {
+const parallaxItem: Variants = {
   hidden: { opacity: 0, x: -60 },
   visible: {
     opacity: 1,
@@ -101,7 +104,7 @@ const parallaxItem = {
   },
 }
 
-const parallaxItemReverse = {
+const parallaxItemReverse: Variants = {
   hidden: { opacity: 0, x: 60 },
   visible: {
     opacity: 1,
@@ -154,16 +157,9 @@ function FeatureSection({
     <motion.div
       ref={ref}
       className={className}
-      initial={shouldReduceMotion ? { opacity: 1 } : reverse ? parallaxItemReverse.hidden : parallaxItem.hidden}
-      animate={
-        isInView
-          ? reverse
-            ? parallaxItemReverse.visible
-            : parallaxItem.visible
-          : reverse
-            ? parallaxItemReverse.hidden
-            : parallaxItem.hidden
-      }
+      variants={reverse ? parallaxItemReverse : parallaxItem}
+      initial={shouldReduceMotion ? { opacity: 1 } : "hidden"}
+      animate={isInView ? "visible" : "hidden"}
     >
       {children}
     </motion.div>
@@ -172,6 +168,12 @@ function FeatureSection({
 
 export default function Home() {
   const shouldReduceMotion = useReducedMotion()
+  const router = useRouter()
+
+  const handleTryAsGuest = () => {
+    setGuestSession()
+    router.push("/guest/dashboard")
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -253,21 +255,21 @@ export default function Home() {
                     </Button>
                   </motion.div>
                 </Link>
-                <Link href="/auth/sign-up" className="w-full sm:w-auto">
-                  <motion.div
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    whileTap={{ scale: 0.98 }}
-                    transition={{ type: "spring", damping: 15, stiffness: 200 }}
+                <motion.div
+                  className="w-full sm:w-auto"
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: "spring", damping: 15, stiffness: 200 }}
+                >
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="w-full sm:w-auto text-base px-8 py-6 font-semibold border-2 bg-transparent"
+                    onClick={handleTryAsGuest}
                   >
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      className="w-full sm:w-auto text-base px-8 py-6 font-semibold border-2 bg-transparent"
-                    >
-                      Try as Guest
-                    </Button>
-                  </motion.div>
-                </Link>
+                    Try as Guest
+                  </Button>
+                </motion.div>
               </motion.div>
 
               <motion.div variants={heroItem} className="flex flex-wrap items-center gap-6 pt-4">
@@ -633,7 +635,7 @@ export default function Home() {
                 <h3 className="text-4xl lg:text-5xl font-bold tracking-tight">Export perfect PDFs instantly</h3>
                 <p className="text-lg text-muted-foreground leading-relaxed">
                   Download your resume as a professionally formatted, ATS-optimized PDF. What you see in the preview is
-                  exactly what you'll get in the export.
+                  exactly what you&apos;ll get in the export.
                 </p>
                 <ul className="space-y-3">
                   {["ATS-optimized formatting", "Consistent rendering", "One-click download"].map((item, i) => (
