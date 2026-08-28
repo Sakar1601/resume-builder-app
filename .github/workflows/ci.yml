@@ -19,7 +19,12 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        # npm ci refuses to run whenever the lockfile's platform-specific optional
+        # dependencies (sharp's darwin-arm64 vs. linux-x64 variants, in this case)
+        # don't perfectly match the runner's platform — regenerating the lockfile
+        # from a Mac doesn't reliably capture every platform's optional entries.
+        # npm install resolves live instead of requiring byte-exact lockfile parity.
+        run: npm install
 
       - name: Lint
         run: npx eslint .
