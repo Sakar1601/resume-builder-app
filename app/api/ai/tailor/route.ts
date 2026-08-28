@@ -1,5 +1,11 @@
 import { z } from "zod"
 import type { ResumeData } from "@/lib/types"
+import { checkRateLimit, getClientKey } from "@/lib/rate-limit"
+import { logAICall } from "@/lib/ai-log"
+import { GROQ_MODEL } from "@/lib/groq"
+
+const RATE_LIMIT_PER_MINUTE = 5
+const MAX_JOB_DESCRIPTION_LENGTH = 8000
 
 const tailorResultsSchema = z.object({
   missing_keywords: z
@@ -28,7 +34,17 @@ const tailorResultsSchema = z.object({
 })
 
 export async function POST(req: Request) {
+  const startTime = Date.now()
+
   try {
+    const { allowed, retryAfterSeconds } = checkRateLimit(getClientKey(req), RATE_LIMIT_PER_MINUTE)
+    if (!allowed) {
+      return Response.json(
+        { error: "Too many requests. Please wait a moment before trying again." },
+        { status: 429, headers: { "Retry-After": String(retryAfterSeconds) } },
+      )
+    }
+
     const { jobDescription, resumeData } = (await req.json()) as {
       jobDescription: string
       resumeData: ResumeData
@@ -36,6 +52,13 @@ export async function POST(req: Request) {
 
     if (!jobDescription?.trim()) {
       return Response.json({ error: "Job description is required" }, { status: 400 })
+    }
+
+    if (jobDescription.length > MAX_JOB_DESCRIPTION_LENGTH) {
+      return Response.json(
+        { error: `Job description is too long (max ${MAX_JOB_DESCRIPTION_LENGTH} characters).` },
+        { status: 400 },
+      )
     }
 
     if (!process.env.GROQ_API_KEY) {
@@ -105,45 +128,75 @@ Analyze the resume against this job description and provide:
 
 Remember: Only work with what exists in the resume. Do not invent anything.`
 
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        messages: [
-          {
-            role: "system",
-            content: systemPrompt,
-          },
-          {
-            role: "user",
-            content: userPrompt,
-          },
-        ],
-        response_format: { type: "json_object" },
-        temperature: 0.7,
-      }),
-    })
+    const messages = [
+      { role: "system" as const, content: systemPrompt },
+      { role: "user" as const, content: userPrompt },
+    ]
 
-    if (!response.ok) {
-      const errorData = await response.text()
-      console.error("Groq API error:", errorData)
-      throw new Error(`Groq API error: ${response.status}`)
+    let lastError: unknown
+    // One retry on malformed output: a fresh sample from the model resolves most
+    // one-off JSON/schema slips without the user having to manually retry.
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: GROQ_MODEL,
+            messages,
+            response_format: { type: "json_object" },
+            temperature: 0.7,
+          }),
+        })
+
+        if (!response.ok) {
+          const errorData = await response.text()
+          console.error("Groq API error:", errorData)
+          throw new Error(`Groq API error: ${response.status}`)
+        }
+
+        const data = await response.json()
+        const content = data.choices[0]?.message?.content || "{}"
+        const parsedObject = JSON.parse(content)
+        const validatedObject = tailorResultsSchema.parse(parsedObject)
+
+        logAICall({
+          route: "tailor",
+          model: GROQ_MODEL,
+          latencyMs: Date.now() - startTime,
+          promptTokens: data.usage?.prompt_tokens,
+          completionTokens: data.usage?.completion_tokens,
+          outcome: attempt === 0 ? "success" : "retry_success",
+        })
+
+        return Response.json(validatedObject)
+      } catch (error) {
+        lastError = error
+        const isMalformed = error instanceof SyntaxError || error instanceof z.ZodError
+        if (!isMalformed || attempt === 1) break
+        logAICall({
+          route: "tailor",
+          model: GROQ_MODEL,
+          latencyMs: Date.now() - startTime,
+          outcome: "malformed_output",
+        })
+      }
     }
 
-    const data = await response.json()
-    const content = data.choices[0]?.message?.content || "{}"
-    const parsedObject = JSON.parse(content)
-
-    // Validate with zod schema
-    const validatedObject = tailorResultsSchema.parse(parsedObject)
-
-    return Response.json(validatedObject)
+    throw lastError
   } catch (error) {
-    console.error("Tailor API error:", error)
+    logAICall({
+      route: "tailor",
+      model: GROQ_MODEL,
+      latencyMs: Date.now() - startTime,
+      outcome: "error",
+    })
+    // Never console.error a raw ZodError — its getters crash Node 24's util.inspect
+    // ("Cannot read properties of undefined (reading 'value')"). Log a safe message instead.
+    console.error("Tailor API error:", error instanceof z.ZodError ? error.issues : error instanceof Error ? error.message : error)
     return Response.json({ error: "Failed to analyze job description. Please try again." }, { status: 500 })
   }
 }

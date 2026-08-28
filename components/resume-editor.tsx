@@ -22,7 +22,7 @@ import { ResumeReadinessChecklist } from "@/components/resume-readiness-checklis
 import { cn } from "@/lib/utils"
 
 interface ResumeEditorProps {
-  resume: (Resume | GuestResume) & { data: ResumeData }
+  resume: (Resume | GuestResume) & { data: ResumeData | null }
   isGuest?: boolean
 }
 

@@ -13,24 +13,29 @@ export default function GuestPrintPage() {
   const [resumeData, setResumeData] = useState<ResumeData | null>(null)
 
   useEffect(() => {
-    if (!isGuestSession()) {
-      router.push("/auth/login")
-      return
-    }
+    // Reading localStorage is a synchronous client-only side effect; deferring the
+    // resulting setState call to a microtask callback (rather than calling it
+    // directly in the effect body) keeps this a "sync from external system" read.
+    queueMicrotask(() => {
+      if (!isGuestSession()) {
+        router.push("/auth/login")
+        return
+      }
 
-    const resume = getGuestResume(id)
+      const resume = getGuestResume(id)
 
-    if (!resume) {
-      router.push("/guest/dashboard")
-      return
-    }
+      if (!resume) {
+        router.push("/guest/dashboard")
+        return
+      }
 
-    setResumeData(resume.data || {})
+      setResumeData(resume.data || {})
 
-    // Trigger print dialog after content loads
-    setTimeout(() => {
-      window.print()
-    }, 500)
+      // Trigger print dialog after content loads
+      setTimeout(() => {
+        window.print()
+      }, 500)
+    })
   }, [id, router])
 
   if (!resumeData) {

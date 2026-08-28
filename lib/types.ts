@@ -5,6 +5,7 @@ export interface Resume {
   template: string
   created_at: string
   updated_at: string
+  data: ResumeData | null
 }
 
 export interface ResumeSection {

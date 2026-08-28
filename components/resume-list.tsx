@@ -26,7 +26,7 @@ interface ResumeListProps {
 
 export function ResumeList({ resumes: initialResumes, isGuest = false }: ResumeListProps) {
   const router = useRouter()
-  const [resumes, setResumes] = useState(initialResumes)
+  const [resumes, setResumes] = useState<(Resume | GuestResume)[]>(initialResumes)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [duplicatingId, setDuplicatingId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
@@ -92,7 +92,7 @@ export function ResumeList({ resumes: initialResumes, isGuest = false }: ResumeL
         user_id: user.id,
         title: `${resume.title} (Copy)`,
         template: (resume as Resume).template,
-        data: resume.data,
+        data: (resume as Resume).data,
       })
       .select()
       .single()
