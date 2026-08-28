@@ -46,7 +46,7 @@ A modern, AI-powered resume builder application built with Next.js, TypeScript, 
 ### Development Tools
 - **ESLint**: Code linting
 - **PostCSS**: CSS processing
-- **pnpm**: Package management
+- **npm**: Package management
 - **Vercel Analytics**: Usage tracking
 
 ## Architecture
@@ -92,7 +92,7 @@ lib/
 
 ### Prerequisites
 - Node.js 18+
-- pnpm package manager
+- npm
 - Supabase account and project
 
 ### Installation
@@ -105,7 +105,7 @@ cd resume-builder-app
 
 2. Install dependencies:
 ```bash
-pnpm install
+npm install
 ```
 
 3. Set up environment variables:
@@ -128,7 +128,7 @@ Run the SQL scripts in the `scripts/` directory in order:
 
 5. Start the development server:
 ```bash
-pnpm dev
+npm run dev
 ```
 
 6. Open [http://localhost:3000](http://localhost:3000) in your browser.
