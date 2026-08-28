@@ -57,6 +57,13 @@ jobs:
 
       - name: Run e2e tests
         run: npx playwright test
+        env:
+          # The auth middleware (lib/supabase/proxy.ts) runs on every route,
+          # guest pages included, so it crashes without these even though the
+          # golden path under test never touches Supabase itself. Same class
+          # of bug as the one that took production down (see audit report).
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
       - name: Upload Playwright report
         if: failure()
