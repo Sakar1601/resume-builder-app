@@ -1,4 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+
+const { checkRateLimitMock } = vi.hoisted(() => ({
+  checkRateLimitMock: vi.fn().mockResolvedValue({ allowed: true, retryAfterSeconds: 0 }),
+}))
+vi.mock("@/lib/rate-limit", () => ({
+  checkRateLimit: checkRateLimitMock,
+  getClientKey: (req: Request) => req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown",
+}))
+
 import { POST } from "./route"
 
 function makeRequest(body: Record<string, unknown>, ip: string) {
@@ -21,6 +30,7 @@ describe("POST /api/ai/rewrite-bullet", () => {
 
   afterEach(() => {
     vi.unstubAllGlobals()
+    checkRateLimitMock.mockResolvedValue({ allowed: true, retryAfterSeconds: 0 })
   })
 
   it("rejects a bullet that's too long instead of forwarding it to the model", async () => {
@@ -43,15 +53,12 @@ describe("POST /api/ai/rewrite-bullet", () => {
     expect(body.suggestions).toHaveLength(3)
   })
 
-  it("rate-limits after 10 requests from the same client within the window", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => validGroqResponse }))
-    const ip = "2.2.2.4"
+  it("returns 429 with a Retry-After header when the rate limiter reports blocked", async () => {
+    checkRateLimitMock.mockResolvedValueOnce({ allowed: false, retryAfterSeconds: 30 })
 
-    let last
-    for (let i = 0; i < 11; i++) {
-      last = await POST(makeRequest({ bullet: "Shipped a feature", tone: "impact" }, ip))
-    }
+    const res = await POST(makeRequest({ bullet: "Shipped a feature", tone: "impact" }, "2.2.2.4"))
 
-    expect(last!.status).toBe(429)
+    expect(res.status).toBe(429)
+    expect(res.headers.get("Retry-After")).toBe("30")
   })
 })
