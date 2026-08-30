@@ -1,47 +1,32 @@
-// In-memory, per-instance sliding-window limiter. Guest mode has no session to key on,
-// so this keys by client IP rather than requiring auth. Note: on serverless platforms
-// (Vercel) each instance holds its own counters, so this caps abuse per-instance, not
-// globally — a determined attacker spread across instances isn't fully stopped. That's
-// an acceptable tradeoff for a portfolio project; a production deployment with real
-// traffic should move this to Upstash Redis or similar shared store.
+import { createClient } from "@supabase/supabase-js"
 
-interface Bucket {
-  count: number
-  windowStart: number
-}
-
-const buckets = new Map<string, Bucket>()
-
-const WINDOW_MS = 60_000
-
-// Periodically drop stale buckets so the map doesn't grow unbounded over the life
-// of a warm serverless instance.
-setInterval(() => {
-  const now = Date.now()
-  for (const [key, bucket] of buckets) {
-    if (now - bucket.windowStart > WINDOW_MS) buckets.delete(key)
-  }
-}, WINDOW_MS).unref?.()
+// Fails open: if the RPC call itself errors (network blip, DB hiccup), we log
+// and allow the request rather than taking the whole AI feature down over a
+// transient Supabase issue. The tradeoff is a brief window with no cap during
+// an outage -- acceptable for a portfolio-scale app; revisit if traffic grows.
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
 
 export function getClientKey(req: Request): string {
   const forwarded = req.headers.get("x-forwarded-for")
   return forwarded?.split(",")[0]?.trim() || "unknown"
 }
 
-export function checkRateLimit(key: string, limit: number): { allowed: boolean; retryAfterSeconds: number } {
-  const now = Date.now()
-  const bucket = buckets.get(key)
+export async function checkRateLimit(
+  key: string,
+  limit: number,
+  windowSeconds = 60,
+): Promise<{ allowed: boolean; retryAfterSeconds: number }> {
+  const { data, error } = await supabase.rpc("check_rate_limit", {
+    p_key: key,
+    p_limit: limit,
+    p_window_seconds: windowSeconds,
+  })
 
-  if (!bucket || now - bucket.windowStart > WINDOW_MS) {
-    buckets.set(key, { count: 1, windowStart: now })
+  if (error) {
+    console.error("Rate limit check failed, failing open:", error.message)
     return { allowed: true, retryAfterSeconds: 0 }
   }
 
-  if (bucket.count >= limit) {
-    const retryAfterSeconds = Math.ceil((WINDOW_MS - (now - bucket.windowStart)) / 1000)
-    return { allowed: false, retryAfterSeconds }
-  }
-
-  bucket.count += 1
-  return { allowed: true, retryAfterSeconds: 0 }
+  const row = data?.[0]
+  return { allowed: row?.allowed ?? true, retryAfterSeconds: row?.retry_after_seconds ?? 0 }
 }

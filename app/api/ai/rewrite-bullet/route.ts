@@ -23,7 +23,7 @@ export async function POST(req: Request) {
   const startTime = Date.now()
 
   try {
-    const { allowed, retryAfterSeconds } = checkRateLimit(getClientKey(req), RATE_LIMIT_PER_MINUTE)
+    const { allowed, retryAfterSeconds } = await checkRateLimit(getClientKey(req), RATE_LIMIT_PER_MINUTE)
     if (!allowed) {
       return NextResponse.json(
         { error: "Too many requests. Please wait a moment before trying again." },

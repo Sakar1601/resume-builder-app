@@ -1,28 +1,40 @@
-import { describe, expect, it } from "vitest"
-import { checkRateLimit } from "@/lib/rate-limit"
+import { afterEach, describe, expect, it, vi } from "vitest"
+
+const rpcMock = vi.fn()
+vi.mock("@supabase/supabase-js", () => ({
+  createClient: () => ({ rpc: rpcMock }),
+}))
+
+afterEach(() => {
+  vi.clearAllMocks()
+  vi.resetModules()
+})
 
 describe("checkRateLimit", () => {
-  it("allows requests up to the limit, then blocks the next one", () => {
-    const key = `test-${crypto.randomUUID()}`
+  it("allows the request when the RPC reports allowed: true", async () => {
+    rpcMock.mockResolvedValue({ data: [{ allowed: true, retry_after_seconds: 0 }], error: null })
+    const { checkRateLimit } = await import("./rate-limit")
 
-    for (let i = 0; i < 3; i++) {
-      expect(checkRateLimit(key, 3).allowed).toBe(true)
-    }
+    const result = await checkRateLimit("some-key", 10)
 
-    const blocked = checkRateLimit(key, 3)
-    expect(blocked.allowed).toBe(false)
-    expect(blocked.retryAfterSeconds).toBeGreaterThan(0)
+    expect(result).toEqual({ allowed: true, retryAfterSeconds: 0 })
   })
 
-  it("tracks separate keys independently", () => {
-    const keyA = `test-${crypto.randomUUID()}`
-    const keyB = `test-${crypto.randomUUID()}`
+  it("blocks the request and surfaces retry_after_seconds when the RPC reports allowed: false", async () => {
+    rpcMock.mockResolvedValue({ data: [{ allowed: false, retry_after_seconds: 42 }], error: null })
+    const { checkRateLimit } = await import("./rate-limit")
 
-    checkRateLimit(keyA, 1)
-    const blockedA = checkRateLimit(keyA, 1)
-    const allowedB = checkRateLimit(keyB, 1)
+    const result = await checkRateLimit("some-key", 10)
 
-    expect(blockedA.allowed).toBe(false)
-    expect(allowedB.allowed).toBe(true)
+    expect(result).toEqual({ allowed: false, retryAfterSeconds: 42 })
+  })
+
+  it("fails open (allows the request) when the RPC call errors", async () => {
+    rpcMock.mockResolvedValue({ data: null, error: { message: "connection reset" } })
+    const { checkRateLimit } = await import("./rate-limit")
+
+    const result = await checkRateLimit("some-key", 10)
+
+    expect(result.allowed).toBe(true)
   })
 })
