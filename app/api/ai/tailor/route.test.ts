@@ -1,4 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+
+const { checkRateLimitMock } = vi.hoisted(() => ({
+  checkRateLimitMock: vi.fn().mockResolvedValue({ allowed: true, retryAfterSeconds: 0 }),
+}))
+vi.mock("@/lib/rate-limit", () => ({
+  checkRateLimit: checkRateLimitMock,
+  getClientKey: (req: Request) => req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown",
+}))
+
 import { POST } from "./route"
 
 const validResumeData = {
@@ -39,6 +48,7 @@ describe("POST /api/ai/tailor", () => {
 
   afterEach(() => {
     vi.unstubAllGlobals()
+    checkRateLimitMock.mockResolvedValue({ allowed: true, retryAfterSeconds: 0 })
   })
 
   it("returns 400 when the job description is missing", async () => {
@@ -92,16 +102,14 @@ describe("POST /api/ai/tailor", () => {
     expect(fetch).toHaveBeenCalledTimes(2)
   })
 
-  it("rate-limits after 5 requests from the same client within the window", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => validGroqResponse }))
-    const ip = "1.1.1.6"
+  it("returns 429 with a Retry-After header when the rate limiter reports blocked", async () => {
+    checkRateLimitMock.mockResolvedValueOnce({ allowed: false, retryAfterSeconds: 15 })
 
-    let last
-    for (let i = 0; i < 6; i++) {
-      last = await POST(makeRequest({ jobDescription: "We need a backend engineer.", resumeData: validResumeData }, ip))
-    }
+    const res = await POST(
+      makeRequest({ jobDescription: "We need a backend engineer.", resumeData: validResumeData }, "1.1.1.6"),
+    )
 
-    expect(last!.status).toBe(429)
-    expect(last!.headers.get("Retry-After")).toBeTruthy()
+    expect(res.status).toBe(429)
+    expect(res.headers.get("Retry-After")).toBe("15")
   })
 })
