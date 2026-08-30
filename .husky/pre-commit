@@ -1,0 +1,14 @@
+# .env files must never be committed — this is exactly how the original
+# secret leak happened (a `git add -f` bypassed .gitignore). Hard block,
+# checked before anything else so a slow lint/test run never gets a chance
+# to distract from it.
+if git diff --cached --name-only | grep -qE '^\.env(\.|$)' ; then
+  echo "ERROR: a .env file is staged for commit. This is almost certainly a mistake -- .env files must never be committed."
+  echo "Staged env files:"
+  git diff --cached --name-only | grep -E '^\.env(\.|$)'
+  exit 1
+fi
+
+npx lint-staged
+npm run typecheck
+npm run test
