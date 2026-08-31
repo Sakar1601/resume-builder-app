@@ -149,6 +149,13 @@ SUPABASE_SERVICE_ROLE_KEY=<your service-role key> node scripts/create-e2e-test-u
 ```
 The key is only read from your shell and never written anywhere; the resulting account is a throwaway fixture scoped by RLS to its own data, safe to leave in place.
 
+### Demo accounts
+
+```bash
+SUPABASE_SERVICE_ROLE_KEY=<your service-role key> node scripts/seed-demo-users.mjs
+```
+Creates two accounts with realistic resume data for product demos: `demo.sarah@resumebuilder.test` (a complete, polished resume) and `demo.marcus@resumebuilder.test` (a deliberately partial one, to show the readiness checklist and section guidance flagging real gaps). Passwords are printed at the end of the script's output.
+
 ## Usage
 
 ### For Guests
