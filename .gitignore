@@ -32,3 +32,6 @@ next-env.d.ts
 # playwright
 /playwright-report
 /test-results
+
+# graphify (local code-graph tool output)
+/graphify-out
