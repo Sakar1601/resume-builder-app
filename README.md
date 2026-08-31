@@ -140,6 +140,15 @@ npm test
 ```
 Runs the Vitest suite: request-validation and rate-limiting behavior for both AI routes, the malformed-output retry path, and an authorization test for the resume-ownership check on the edit page.
 
+```bash
+npm run test:e2e
+```
+Runs the Playwright suite against a real built app (guest golden path + the authenticated golden path). The authenticated test signs in as a fixed fixture account — create it once with:
+```bash
+SUPABASE_SERVICE_ROLE_KEY=<your service-role key> node scripts/create-e2e-test-user.mjs
+```
+The key is only read from your shell and never written anywhere; the resulting account is a throwaway fixture scoped by RLS to its own data, safe to leave in place.
+
 ## Usage
 
 ### For Guests
