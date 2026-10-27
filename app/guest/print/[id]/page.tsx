@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { ResumePreview } from "@/components/resume-preview"
+import { ResumePreview } from "@/components/resume/resume-preview"
 import { isGuestSession, getGuestResume } from "@/lib/guest-session"
 import type { ResumeData } from "@/lib/types"
 

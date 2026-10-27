@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import { ResumePreview } from "@/components/resume-preview"
+import { ResumePreview } from "@/components/resume/resume-preview"
 import type { ResumeData } from "@/lib/types"
 
 export default async function PrintResumePage({ params }: { params: Promise<{ id: string }> }) {

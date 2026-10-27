@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import { ResumeEditor } from "@/components/resume-editor"
+import { ResumeEditor } from "@/components/resume/resume-editor"
 
 export default async function ResumeEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params

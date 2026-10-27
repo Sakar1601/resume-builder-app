@@ -4,13 +4,13 @@ import type React from "react"
 
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { AuthShell } from "@/components/auth/auth-shell"
+import { setGuestSession } from "@/lib/guest-session"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
-import { FileText } from "lucide-react"
 
 export default function SignUpPage() {
   const [fullName, setFullName] = useState("")
@@ -54,99 +54,91 @@ export default function SignUpPage() {
   }
 
   const handleGuestMode = () => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("guest_session", "true")
-      router.push("/guest/dashboard")
-    }
+    setGuestSession()
+    router.push("/guest/dashboard")
   }
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center p-6 md:p-10 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900">
-      <div className="w-full max-w-sm">
-        <div className="flex flex-col gap-6">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <FileText className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold">ResumeBuilder</span>
-          </div>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl">Create Account</CardTitle>
-              <CardDescription>Start building your professional resume today</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSignUp}>
-                <div className="flex flex-col gap-6">
-                  <div className="grid gap-2">
-                    <Label htmlFor="fullName">Full Name</Label>
-                    <Input
-                      id="fullName"
-                      type="text"
-                      placeholder="John Doe"
-                      required
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="name@example.com"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="password">Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="repeat-password">Confirm Password</Label>
-                    <Input
-                      id="repeat-password"
-                      type="password"
-                      required
-                      value={repeatPassword}
-                      onChange={(e) => setRepeatPassword(e.target.value)}
-                    />
-                  </div>
-                  {error && <p className="text-sm text-destructive">{error}</p>}
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Creating account..." : "Create Account"}
-                  </Button>
+    <AuthShell>
+      <h1 className="text-5xl tracking-normal">Create your account</h1>
+      <p className="mt-2 text-muted-foreground">Save resumes to the cloud and tailor them from anywhere.</p>
 
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-background px-2 text-muted-foreground">Or</span>
-                    </div>
-                  </div>
-
-                  <Button type="button" variant="outline" className="w-full bg-transparent" onClick={handleGuestMode}>
-                    Continue as Guest
-                  </Button>
-                </div>
-                <div className="mt-4 text-center text-sm">
-                  Already have an account?{" "}
-                  <Link href="/auth/login" className="underline underline-offset-4 text-primary">
-                    Sign in
-                  </Link>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
+      <form onSubmit={handleSignUp} className="mt-8 flex flex-col gap-5">
+        <div className="grid gap-2">
+          <Label htmlFor="fullName">Full Name</Label>
+          <Input
+            id="fullName"
+            type="text"
+            placeholder="John Doe"
+            autoComplete="name"
+            required
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+          />
         </div>
-      </div>
-    </div>
+        <div className="grid gap-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            placeholder="name@example.com"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            type="password"
+            autoComplete="new-password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="repeat-password">Confirm Password</Label>
+          <Input
+            id="repeat-password"
+            type="password"
+            autoComplete="new-password"
+            required
+            value={repeatPassword}
+            onChange={(e) => setRepeatPassword(e.target.value)}
+          />
+        </div>
+        {error && (
+          <p role="alert" className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            {error}
+          </p>
+        )}
+        <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
+          {isLoading ? "Creating account..." : "Create Account"}
+        </Button>
+
+        <div className="relative my-1">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase tracking-widest">
+            <span className="bg-background px-3 text-muted-foreground">or</span>
+          </div>
+        </div>
+
+        <Button type="button" variant="outline" size="lg" className="w-full" onClick={handleGuestMode}>
+          Continue as Guest
+        </Button>
+      </form>
+
+      <p className="mt-8 text-center text-sm text-muted-foreground">
+        Already have an account?{" "}
+        <Link href="/auth/login" className="font-medium text-primary underline-offset-4 hover:underline">
+          Sign in
+        </Link>
+      </p>
+    </AuthShell>
   )
 }

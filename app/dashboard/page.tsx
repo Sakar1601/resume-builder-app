@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server"
-import { ResumeList } from "@/components/resume-list"
-import { CreateResumeDialog } from "@/components/create-resume-dialog"
+import { ResumeList } from "@/components/resume/resume-list"
+import { CreateResumeDialog } from "@/components/resume/create-resume-dialog"
+import { PageHeader } from "@/components/layout/page-header"
+import { PageTransition } from "@/components/motion/reveal"
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -16,16 +18,9 @@ export default async function DashboardPage() {
     .order("updated_at", { ascending: false })
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">My Resumes</h1>
-          <p className="text-muted-foreground mt-2">Create and manage your professional resumes</p>
-        </div>
-        <CreateResumeDialog />
-      </div>
-
+    <PageTransition className="space-y-10">
+      <PageHeader title="My Resumes" description="Create, tailor and export your resumes" action={<CreateResumeDialog />} />
       <ResumeList resumes={resumes || []} />
-    </div>
+    </PageTransition>
   )
 }
