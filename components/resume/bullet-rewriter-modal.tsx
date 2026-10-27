@@ -113,20 +113,20 @@ export function BulletRewriterModal({ open, onOpenChange, originalBullet, onSele
 
           <div className="space-y-2">
             <Label>Tone</Label>
-            <RadioGroup value={tone} onValueChange={(value) => setTone(value as Tone)}>
-              <div className="flex items-center space-x-2">
+            <RadioGroup value={tone} onValueChange={(value) => setTone(value as Tone)} className="gap-2">
+              <div className="flex items-center gap-3 rounded-xl border p-3 transition-colors has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-accent/60">
                 <RadioGroupItem value="impact" id="impact" />
                 <Label htmlFor="impact" className="font-normal cursor-pointer">
                   More Impact - Emphasize achievements and results
                 </Label>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-3 rounded-xl border p-3 transition-colors has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-accent/60">
                 <RadioGroupItem value="concise" id="concise" />
                 <Label htmlFor="concise" className="font-normal cursor-pointer">
                   More Concise - Shorter and to the point
                 </Label>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-3 rounded-xl border p-3 transition-colors has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-accent/60">
                 <RadioGroupItem value="technical" id="technical" />
                 <Label htmlFor="technical" className="font-normal cursor-pointer">
                   More Technical - Highlight technical skills and tools

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
-import { ChevronLeft, FileDown, Maximize2, Minimize2, AlertCircle } from "lucide-react"
+import { UserRound, AlignLeft, Wrench, Briefcase, FolderGit2, GraduationCap, Sparkles, ChevronLeft, FileDown, Maximize2, Minimize2, AlertCircle } from "lucide-react"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import type { Resume, ResumeData } from "@/lib/types"
@@ -129,7 +129,7 @@ export function ResumeEditor({ resume: initialResume, isGuest = false }: ResumeE
                 />
               ) : (
                 <h1
-                  className="font-sans text-lg font-semibold truncate cursor-pointer hover:text-primary transition-colors"
+                  className="font-display text-2xl leading-none truncate cursor-pointer hover:text-primary transition-colors"
                   onClick={() => setIsEditingTitle(true)}
                 >
                   {resumeTitle}
@@ -199,26 +199,33 @@ export function ResumeEditor({ resume: initialResume, isGuest = false }: ResumeE
             <ResumeReadinessChecklist data={resumeData} />
 
             <Tabs defaultValue="contact" className="w-full">
-              <TabsList className="grid h-auto w-full grid-cols-4 gap-1 lg:grid-cols-7">
-                <TabsTrigger value="contact" className="data-[state=active]:bg-primary/10">
+              <TabsList className="h-auto w-full justify-start gap-1 overflow-x-auto p-1.5 [scrollbar-width:none]">
+                <TabsTrigger value="contact">
+                  <UserRound className="hidden sm:block" />
                   Contact
                 </TabsTrigger>
-                <TabsTrigger value="summary" className="data-[state=active]:bg-primary/10">
+                <TabsTrigger value="summary">
+                  <AlignLeft className="hidden sm:block" />
                   Summary
                 </TabsTrigger>
-                <TabsTrigger value="skills" className="data-[state=active]:bg-primary/10">
+                <TabsTrigger value="skills">
+                  <Wrench className="hidden sm:block" />
                   Skills
                 </TabsTrigger>
-                <TabsTrigger value="experience" className="data-[state=active]:bg-primary/10">
+                <TabsTrigger value="experience">
+                  <Briefcase className="hidden sm:block" />
                   Experience
                 </TabsTrigger>
-                <TabsTrigger value="projects" className="data-[state=active]:bg-primary/10">
+                <TabsTrigger value="projects">
+                  <FolderGit2 className="hidden sm:block" />
                   Projects
                 </TabsTrigger>
-                <TabsTrigger value="education" className="data-[state=active]:bg-primary/10">
+                <TabsTrigger value="education">
+                  <GraduationCap className="hidden sm:block" />
                   Education
                 </TabsTrigger>
-                <TabsTrigger value="tailor" className="data-[state=active]:bg-primary/10">
+                <TabsTrigger value="tailor">
+                  <Sparkles className="hidden sm:block" />
                   Tailor
                 </TabsTrigger>
               </TabsList>
@@ -258,32 +265,20 @@ export function ResumeEditor({ resume: initialResume, isGuest = false }: ResumeE
           >
             <Card className="h-full flex flex-col gap-0 overflow-hidden py-0 shadow-lift">
               <div className="flex items-center justify-between px-4 py-3 border-b bg-muted/30">
-                <span className="text-sm font-medium">Preview</span>
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setPreviewZoom(90)}
-                    className={cn("h-7 px-2 text-xs", previewZoom === 90 && "bg-primary/10")}
-                  >
-                    90%
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setPreviewZoom(100)}
-                    className={cn("h-7 px-2 text-xs", previewZoom === 100 && "bg-primary/10")}
-                  >
-                    100%
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setPreviewZoom(110)}
-                    className={cn("h-7 px-2 text-xs", previewZoom === 110 && "bg-primary/10")}
-                  >
-                    110%
-                  </Button>
+                <span className="flex items-center gap-2 text-sm font-medium"><span className="size-1.5 rounded-full bg-primary" />Live preview</span>
+                <div className="flex items-center rounded-lg bg-secondary p-0.5">
+                  {[90, 100, 110].map((z) => (
+                    <button
+                      key={z}
+                      onClick={() => setPreviewZoom(z)}
+                      className={cn(
+                        "rounded-md px-2.5 py-1 text-xs font-medium transition-all",
+                        previewZoom === z ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
+                      )}
+                    >
+                      {z}%
+                    </button>
+                  ))}
                 </div>
               </div>
 

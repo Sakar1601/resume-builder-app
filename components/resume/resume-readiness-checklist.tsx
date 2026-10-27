@@ -1,17 +1,19 @@
 "use client"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { CheckCircle2, Circle } from "lucide-react"
-import type { ResumeData } from "@/lib/types"
-import { Button } from "@/components/ui/button"
 import { useState } from "react"
+import { Check, ChevronDown } from "lucide-react"
+import type { ResumeData } from "@/lib/types"
+import { cn } from "@/lib/utils"
 
 interface ReadinessChecklistProps {
   data: ResumeData
 }
 
+const RADIUS = 20
+const CIRCUMFERENCE = 2 * Math.PI * RADIUS
+
 export function ResumeReadinessChecklist({ data }: ReadinessChecklistProps) {
-  const [isExpanded, setIsExpanded] = useState(true)
+  const [isExpanded, setIsExpanded] = useState(false)
 
   const checks = [
     {
@@ -51,43 +53,58 @@ export function ResumeReadinessChecklist({ data }: ReadinessChecklistProps) {
   const passedCount = checks.filter((c) => c.passed).length
   const totalCount = checks.length
   const percentage = Math.round((passedCount / totalCount) * 100)
+  const nextStep = checks.find((c) => !c.passed)
 
   return (
-    <Card className="border-primary/20">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <CardTitle className="text-base">Resume Readiness</CardTitle>
-            <CardDescription className="text-xs">
-              {passedCount} of {totalCount} checks passed
-            </CardDescription>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="text-2xl font-bold text-primary">{percentage}%</div>
-            <Button variant="ghost" size="sm" onClick={() => setIsExpanded(!isExpanded)} className="h-8 px-2">
-              {isExpanded ? "Hide" : "Show"}
-            </Button>
-          </div>
+    <div className="overflow-hidden rounded-2xl border bg-card">
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        aria-expanded={isExpanded}
+        className="flex w-full items-center gap-4 p-4 text-left transition-colors hover:bg-secondary/50"
+      >
+        <div className="relative size-12 shrink-0">
+          <svg viewBox="0 0 48 48" className="size-full -rotate-90">
+            <circle cx="24" cy="24" r={RADIUS} fill="none" strokeWidth="4" className="stroke-border" />
+            <circle
+              cx="24"
+              cy="24"
+              r={RADIUS}
+              fill="none"
+              strokeWidth="4"
+              strokeLinecap="round"
+              className="stroke-primary transition-all duration-700 ease-out"
+              strokeDasharray={CIRCUMFERENCE}
+              strokeDashoffset={CIRCUMFERENCE * (1 - percentage / 100)}
+            />
+          </svg>
+          <span className="absolute inset-0 flex items-center justify-center text-[11px] font-semibold">{percentage}%</span>
         </div>
-        {/* Progress Bar */}
-        <div className="w-full h-2 bg-muted rounded-full overflow-hidden mt-3">
-          <div className="h-full bg-primary transition-all duration-500 ease-out" style={{ width: `${percentage}%` }} />
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold">Resume readiness</p>
+          <p className="truncate text-xs text-muted-foreground">
+            {nextStep ? `Next: ${nextStep.label.toLowerCase()}` : "Everything looks ready to send"}
+          </p>
         </div>
-      </CardHeader>
+        <ChevronDown className={cn("size-4 shrink-0 text-muted-foreground transition-transform duration-300", isExpanded && "rotate-180")} />
+      </button>
+
       {isExpanded && (
-        <CardContent className="space-y-2 pt-0">
+        <ul className="grid gap-2 border-t p-4 sm:grid-cols-2">
           {checks.map((check) => (
-            <div key={check.id} className="flex items-start gap-2 text-sm">
-              {check.passed ? (
-                <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-              ) : (
-                <Circle className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-              )}
+            <li key={check.id} className="flex items-center gap-2.5 text-sm">
+              <span
+                className={cn(
+                  "flex size-5 shrink-0 items-center justify-center rounded-full",
+                  check.passed ? "bg-primary text-primary-foreground" : "border border-dashed border-muted-foreground/60",
+                )}
+              >
+                {check.passed && <Check className="size-3" strokeWidth={3.5} />}
+              </span>
               <span className={check.passed ? "text-foreground" : "text-muted-foreground"}>{check.label}</span>
-            </div>
+            </li>
           ))}
-        </CardContent>
+        </ul>
       )}
-    </Card>
+    </div>
   )
 }
