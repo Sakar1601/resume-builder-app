@@ -20,6 +20,7 @@ import { TailorToJob } from "@/components/resume/tailor-to-job"
 import { ResumePreview } from "@/components/resume/resume-preview"
 import { ResumeReadinessChecklist } from "@/components/resume/resume-readiness-checklist"
 import { cn } from "@/lib/utils"
+import { LogoMark } from "@/components/brand/logo"
 import { ThemeToggle } from "@/components/theme/theme-toggle"
 
 interface ResumeEditorProps {
@@ -115,6 +116,7 @@ export function ResumeEditor({ resume: initialResume, isGuest = false }: ResumeE
                 <ChevronLeft className="h-5 w-5" />
               </Button>
             </Link>
+            <LogoMark className="hidden size-7 shrink-0 sm:block" />
             <div className="min-w-0 flex-1">
               {isEditingTitle ? (
                 <Input

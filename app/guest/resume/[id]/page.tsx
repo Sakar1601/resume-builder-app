@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
+import { LogoMark } from "@/components/brand/logo"
 import { ResumeEditor } from "@/components/resume/resume-editor"
 import { isGuestSession, getGuestResume } from "@/lib/guest-session"
 import type { GuestResume } from "@/lib/guest-session"
@@ -38,7 +39,7 @@ export default function GuestResumeEditPage() {
   if (isLoading || !resume) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="size-8 animate-spin rounded-full border-2 border-primary border-t-transparent" role="status" aria-label="Loading" />
+        <div role="status" aria-label="Loading"><LogoMark className="size-12 animate-pulse" /></div>
       </div>
     )
   }

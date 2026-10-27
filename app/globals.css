@@ -33,6 +33,7 @@
   --ring: oklch(0.6 0.21 38);
   --radius: 0.75rem;
   --grain-opacity: 0.06;
+  --highlight: var(--spark);
 }
 
 .dark {
@@ -64,6 +65,7 @@
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.72 0.19 45);
   --grain-opacity: 0.09;
+  --highlight: var(--spark);
 }
 
 @theme inline {
@@ -164,11 +166,17 @@
 @layer utilities {
   /* Marker-pen highlight behind a phrase */
   .highlight {
-    background-image: linear-gradient(transparent 58%, var(--spark) 58%, var(--spark) 92%, transparent 92%);
+    background-image: linear-gradient(transparent 58%, var(--highlight) 58%, var(--highlight) 92%, transparent 92%);
     padding-inline: 0.08em;
-    color: oklch(0.18 0.012 60);
     box-decoration-break: clone;
     -webkit-box-decoration-break: clone;
+  }
+  /* Light text on a dark page: swap the marker band for an underline so the glyphs stay legible. */
+  .dark .highlight {
+    background-image: linear-gradient(transparent 84%, var(--highlight) 84%, var(--highlight) 95%, transparent 95%);
+  }
+  .dark :is(.bg-white, [class*="bg-white"]) .highlight {
+    background-image: linear-gradient(transparent 58%, var(--highlight) 58%, var(--highlight) 92%, transparent 92%);
   }
   .bg-dots {
     background-image: radial-gradient(color-mix(in oklab, var(--foreground) 16%, transparent) 1px, transparent 1px);
