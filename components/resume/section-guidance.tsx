@@ -29,7 +29,7 @@ export function SectionGuidance({ tips, examples }: SectionGuidanceProps) {
       <div className="flex items-start gap-3">
         <Lightbulb className="mt-0.5 size-4 shrink-0 text-primary" />
         <div className="space-y-2 text-sm">
-          <p className="font-display text-xl leading-none text-accent-foreground">Tips</p>
+          <p className="font-semibold text-accent-foreground">Tips</p>
           <ul className="space-y-1 text-muted-foreground">
             {tips.map((tip, i) => (
               <li key={i} className="flex items-start gap-2">

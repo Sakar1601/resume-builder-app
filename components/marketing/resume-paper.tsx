@@ -13,7 +13,7 @@ export function ResumePaper({ variant = "frontend", className }: { variant?: Pap
   const v = ROLES[variant]
   return (
     <div className={cn("aspect-[8.5/11] w-full rounded-md bg-white p-5 text-neutral-900 shadow-xl ring-1 ring-black/10", className)} aria-hidden="true">
-      <p className="font-display text-xl leading-none">Sarah Johnson</p>
+      <p className="font-sans text-base font-bold leading-none">Sarah Johnson</p>
       <p className="mt-1 text-[9px] text-neutral-500">{v.role} · San Francisco, CA</p>
       <div className="mt-3 h-px bg-neutral-200" />
       <p className="mt-3 text-[8px] font-semibold tracking-wider text-neutral-400">EXPERIENCE</p>

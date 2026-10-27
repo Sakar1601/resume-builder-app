@@ -129,7 +129,7 @@ export function ResumeEditor({ resume: initialResume, isGuest = false }: ResumeE
                 />
               ) : (
                 <h1
-                  className="font-display text-2xl leading-none truncate cursor-pointer hover:text-primary transition-colors"
+                  className="font-sans text-lg font-semibold tracking-tight truncate cursor-pointer hover:text-primary transition-colors"
                   onClick={() => setIsEditingTitle(true)}
                 >
                   {resumeTitle}

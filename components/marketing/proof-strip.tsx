@@ -13,7 +13,7 @@ export function ProofStrip() {
       <dl className="grid grid-cols-2 gap-y-10 border-y py-10 md:grid-cols-4">
         {STATS.map((s, i) => (
           <div key={s.label} className={i > 0 ? "md:border-l md:pl-8" : ""}>
-            <dt className="font-display text-6xl leading-none">{s.value}</dt>
+            <dt className="font-display text-7xl leading-none">{s.value}</dt>
             <dd className="mt-3 max-w-[12rem] text-sm text-muted-foreground">{s.label}</dd>
           </div>
         ))}

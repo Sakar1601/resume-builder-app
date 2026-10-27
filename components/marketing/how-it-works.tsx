@@ -20,7 +20,7 @@ function Visual({ step }: { step: number }) {
       <div className={frame}>
         <div className="rounded-xl border bg-background p-5">
           <p className="text-xs font-medium text-muted-foreground">Welcome</p>
-          <p className="mt-2 font-display text-3xl">Start building.</p>
+          <p className="mt-2 text-2xl font-semibold tracking-tight">Start building.</p>
           <div className="mt-5 inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground">Try as Guest →</div>
         </div>
         <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
@@ -42,7 +42,7 @@ function Visual({ step }: { step: number }) {
           ))}
         </div>
         <div className="flex-1 rounded-sm bg-white p-4 text-neutral-900 shadow-lg">
-          <p className="font-display text-xl leading-none">Sarah Johnson</p>
+          <p className="font-sans text-base font-bold leading-none">Sarah Johnson</p>
           <div className="mt-3 space-y-1.5">
             <span className="block h-1.5 w-full rounded-full bg-neutral-200" />
             <span className="block h-1.5 w-10/12 rounded-full bg-neutral-200" />

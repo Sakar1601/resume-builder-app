@@ -43,7 +43,7 @@ function ReadinessRing() {
             transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
           />
         </svg>
-        <span className="absolute inset-0 flex items-center justify-center font-display text-3xl">83%</span>
+        <span className="absolute inset-0 flex items-center justify-center text-2xl font-bold tracking-tight">83%</span>
       </div>
       <ul className="space-y-2 text-sm">
         {[
