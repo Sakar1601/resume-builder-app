@@ -39,6 +39,18 @@ describe("guest sample data", () => {
     expect(resumes.every((r) => r.data?.experience?.length)).toBe(true)
   })
 
+  it("seeds a browser that already has an empty resume list", () => {
+    localStorage.setItem("guest_resumes", "[]")
+    setGuestSession()
+    expect(getGuestResumes().length).toBeGreaterThanOrEqual(3)
+  })
+
+  it("leaves an existing guest's own resumes alone", () => {
+    const mine = createGuestResume("Mine")
+    setGuestSession()
+    expect(getGuestResumes().map((r) => r.id)).toEqual([mine.id])
+  })
+
   it("does not reseed or overwrite on later sessions", () => {
     setGuestSession()
     getGuestResumes().forEach((r) => deleteGuestResume(r.id))

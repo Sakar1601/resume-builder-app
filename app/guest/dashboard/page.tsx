@@ -9,7 +9,7 @@ import { PageHeader } from "@/components/layout/page-header"
 import { PageTransition } from "@/components/motion/reveal"
 import { CreateResumeDialog } from "@/components/resume/create-resume-dialog"
 import { ResumeList } from "@/components/resume/resume-list"
-import { isGuestSession, getGuestResumes, type GuestResume } from "@/lib/guest-session"
+import { isGuestSession, getGuestResumes, seedGuestSampleData, type GuestResume } from "@/lib/guest-session"
 
 export default function GuestDashboardPage() {
   const router = useRouter()
@@ -21,6 +21,8 @@ export default function GuestDashboardPage() {
       router.push("/auth/login")
       return
     }
+
+    seedGuestSampleData()
 
     const loadResumes = () => {
       setResumes(getGuestResumes())
