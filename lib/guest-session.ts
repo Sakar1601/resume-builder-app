@@ -1,5 +1,6 @@
 "use client"
 
+import { buildGuestSampleResumes } from "./guest-sample-data"
 import type { ResumeData } from "./types"
 
 const GUEST_SESSION_KEY = "guest_session"
@@ -17,6 +18,13 @@ export interface GuestResume {
 export function setGuestSession() {
   if (typeof window === "undefined") return
   localStorage.setItem(GUEST_SESSION_KEY, "true")
+
+  // Seed sample resumes once, for a first-time guest only. The key's presence
+  // (even as "[]") means the guest has been here, so deleting everything
+  // never brings the samples back.
+  if (localStorage.getItem(GUEST_RESUMES_KEY) === null) {
+    saveGuestResumes(buildGuestSampleResumes())
+  }
 }
 
 export function isGuestSession(): boolean {

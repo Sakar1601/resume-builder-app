@@ -31,6 +31,22 @@ describe("guest session flag", () => {
   })
 })
 
+describe("guest sample data", () => {
+  it("seeds sample resumes for a first-time guest", () => {
+    setGuestSession()
+    const resumes = getGuestResumes()
+    expect(resumes.length).toBeGreaterThanOrEqual(3)
+    expect(resumes.every((r) => r.data?.experience?.length)).toBe(true)
+  })
+
+  it("does not reseed or overwrite on later sessions", () => {
+    setGuestSession()
+    getGuestResumes().forEach((r) => deleteGuestResume(r.id))
+    setGuestSession()
+    expect(getGuestResumes()).toEqual([])
+  })
+})
+
 describe("guest resume CRUD", () => {
   it("creates a resume with null data, unshifted to the front of the list", () => {
     const first = createGuestResume("First Resume")
