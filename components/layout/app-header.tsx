@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { LogOut, UserRound } from "lucide-react"
+import { House, LogOut, UserRound } from "lucide-react"
 import type { User } from "@supabase/supabase-js"
 import { Logo } from "@/components/brand/logo"
 import { Button } from "@/components/ui/button"
@@ -41,9 +41,17 @@ export function AppHeader(props: AppHeaderProps) {
         <div className="flex items-center gap-2">
         <ThemeToggle />
         {props.isGuest ? (
-          <Button asChild size="sm">
-            <Link href="/auth/sign-up">Create Account</Link>
-          </Button>
+          <>
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/" aria-label="Back to home page">
+                <House />
+                <span className="hidden sm:inline">Home</span>
+              </Link>
+            </Button>
+            <Button asChild size="sm">
+              <Link href="/auth/sign-up">Create Account</Link>
+            </Button>
+          </>
         ) : (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -60,6 +68,12 @@ export function AppHeader(props: AppHeaderProps) {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href="/">
+                  <House className="mr-2 h-4 w-4" />
+                  <span>Home page</span>
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={handleSignOut}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Sign out</span>
