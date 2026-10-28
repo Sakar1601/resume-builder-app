@@ -17,7 +17,7 @@ test("landing page -> guest mode -> create resume -> editor persists data", asyn
   await page.goto("/")
   await expect(page.getByText("Land your dream job faster")).toBeVisible()
 
-  await page.getByRole("button", { name: "Try as Guest" }).click()
+  await page.getByRole("button", { name: "Try as Guest" }).first().click()
   await expect(page).toHaveURL(/\/guest\/dashboard/)
 
   await page.getByRole("button", { name: "Create Resume" }).click()

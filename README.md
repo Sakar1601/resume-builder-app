@@ -31,7 +31,8 @@ A modern, AI-powered resume builder application built with Next.js, TypeScript, 
 - **TypeScript**: Type-safe development
 - **Tailwind CSS**: Utility-first CSS framework
 - **Radix UI**: Accessible component primitives
-- **Framer Motion**: Smooth animations and transitions
+- **Framer Motion**: Scroll reveals, shared-layout and entrance animations
+- **Bricolage Grotesque + Geist**: Display and body typography
 
 ### Backend & Database
 - **Supabase**: PostgreSQL database with real-time subscriptions and authentication
@@ -53,27 +54,19 @@ A modern, AI-powered resume builder application built with Next.js, TypeScript, 
 
 ### Project Structure
 ```
-app/
-├── api/                    # API routes
-│   ├── ai/                # AI-powered endpoints
-│   │   ├── rewrite-bullet/# Bullet rewriting
-│   │   └── tailor/        # Job tailoring
-│   ├── auth/              # Authentication routes
-│   └── ...
-├── dashboard/             # User dashboard
-├── guest/                 # Guest mode routes
-├── print/                 # PDF export routes
-└── ...
-
+app/                    # Routes (App Router): landing, auth, dashboard, guest, print, api/ai
 components/
-├── sections/              # Resume section editors
-├── ui/                    # Reusable UI components
-└── ...
-
-lib/
-├── supabase/             # Database client
-├── types.ts              # TypeScript definitions
-└── ...
+├── ui/                 # shadcn primitives actually in use
+├── marketing/          # Landing page sections
+├── auth/               # Auth screen shell
+├── layout/             # App header, page header
+├── resume/             # Editor, preview, list, AI dialogs, section editors
+├── motion/             # Reveal / stagger / page-transition helpers
+└── brand/              # Logo
+lib/                    # supabase clients, guest session, rate limit, AI helpers, types
+db/migrations/          # Ordered SQL migrations
+scripts/                # Node utilities (demo/e2e user seeding)
+e2e/                    # Playwright golden-path tests
 ```
 
 ### Database Schema
@@ -118,7 +111,7 @@ GROQ_API_KEY=your-groq-api-key
 `.env.local` is gitignored — never commit it. The app doesn't use the Supabase service-role key; all database access goes through the anon key and is enforced by Postgres Row Level Security.
 
 4. Set up the database:
-Run the SQL scripts in the `scripts/` directory in order:
+Run the SQL files in `db/migrations/` in order:
 - `001_create_resumes_table.sql`
 - `002_create_resume_sections.sql`
 - `003_create_profiles_table.sql`

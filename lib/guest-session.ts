@@ -1,9 +1,11 @@
 "use client"
 
+import { buildGuestSampleResumes } from "./guest-sample-data"
 import type { ResumeData } from "./types"
 
 const GUEST_SESSION_KEY = "guest_session"
 const GUEST_RESUMES_KEY = "guest_resumes"
+const GUEST_SEEDED_KEY = "guest_seeded"
 
 export interface GuestResume {
   id: string
@@ -14,9 +16,23 @@ export interface GuestResume {
   user_id: string
 }
 
+// Seed sample resumes once per browser, and only into an empty list, so a
+// guest who already has their own resumes never has them touched. The flag
+// means deleting everything later never brings the samples back.
+export function seedGuestSampleData() {
+  if (typeof window === "undefined") return
+  if (localStorage.getItem(GUEST_SEEDED_KEY) !== null) return
+  localStorage.setItem(GUEST_SEEDED_KEY, "true")
+  if (getGuestResumes().length === 0) {
+    saveGuestResumes(buildGuestSampleResumes())
+  }
+}
+
 export function setGuestSession() {
   if (typeof window === "undefined") return
   localStorage.setItem(GUEST_SESSION_KEY, "true")
+
+  seedGuestSampleData()
 }
 
 export function isGuestSession(): boolean {

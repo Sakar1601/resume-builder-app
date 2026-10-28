@@ -31,6 +31,34 @@ describe("guest session flag", () => {
   })
 })
 
+describe("guest sample data", () => {
+  it("seeds sample resumes for a first-time guest", () => {
+    setGuestSession()
+    const resumes = getGuestResumes()
+    expect(resumes.length).toBeGreaterThanOrEqual(3)
+    expect(resumes.every((r) => r.data?.experience?.length)).toBe(true)
+  })
+
+  it("seeds a browser that already has an empty resume list", () => {
+    localStorage.setItem("guest_resumes", "[]")
+    setGuestSession()
+    expect(getGuestResumes().length).toBeGreaterThanOrEqual(3)
+  })
+
+  it("leaves an existing guest's own resumes alone", () => {
+    const mine = createGuestResume("Mine")
+    setGuestSession()
+    expect(getGuestResumes().map((r) => r.id)).toEqual([mine.id])
+  })
+
+  it("does not reseed or overwrite on later sessions", () => {
+    setGuestSession()
+    getGuestResumes().forEach((r) => deleteGuestResume(r.id))
+    setGuestSession()
+    expect(getGuestResumes()).toEqual([])
+  })
+})
+
 describe("guest resume CRUD", () => {
   it("creates a resume with null data, unshifted to the front of the list", () => {
     const first = createGuestResume("First Resume")
