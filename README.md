@@ -1,5 +1,9 @@
 # ResumeBuilder
 
+> AI-powered, ATS-friendly resume builder with live preview and PDF export.
+
+[![Live demo](https://img.shields.io/badge/demo-live-brightgreen)](https://resume-builder-app-phi.vercel.app/) ![License](https://img.shields.io/badge/license-MIT-blue)
+
 A modern, AI-powered resume builder application built with Next.js, TypeScript, and Supabase. Create professional, ATS-friendly resumes with real-time preview, AI-assisted content improvement, and seamless PDF export.
 
 ## Features
@@ -180,4 +184,10 @@ The app can be deployed to any platform supporting Next.js:
 - Railway
 - Self-hosted with Docker
 
+## Security
 
+See [SECURITY.md](SECURITY.md) for how to report a vulnerability. Never commit real credentials; use `.env.example` as the template for local configuration.
+
+## License
+
+Released under the [MIT License](LICENSE).
