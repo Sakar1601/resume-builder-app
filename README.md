@@ -1,4 +1,4 @@
-# ResumeBuilder
+<h1 align="center"><img src="docs/images/banner.svg" alt="ResumeBuilder: AI-powered, ATS-friendly resume builder."></h1>
 
 > AI-powered, ATS-friendly resume builder with live preview and PDF export.
 
@@ -184,9 +184,21 @@ The app can be deployed to any platform supporting Next.js:
 - Railway
 - Self-hosted with Docker
 
+## Testing and CI
+
+`.github/workflows/ci.yml` runs lint, typecheck, unit tests and build, then a Playwright E2E smoke test, on every push and pull request. Husky and lint-staged run checks before each commit.
+
+## Status
+
+Active. Guests can try the editor without an account; signed-in users get saved resumes.
+
+## Contributing
+
+Contributions are welcome; read [CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md) first.
+
 ## Security
 
-See [SECURITY.md](SECURITY.md) for how to report a vulnerability. Never commit real credentials; use `.env.example` as the template for local configuration.
+Report vulnerabilities privately; see [SECURITY.md](SECURITY.md).
 
 ## License
 
