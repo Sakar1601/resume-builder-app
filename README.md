@@ -6,6 +6,18 @@
 
 A modern, AI-powered resume builder application built with Next.js, TypeScript, and Supabase. Create professional, ATS-friendly resumes with real-time preview, AI-assisted content improvement, and seamless PDF export.
 
+## Screenshots
+
+| | |
+| --- | --- |
+| ![Landing page](docs/screenshots/landing.png) | ![Dashboard](docs/screenshots/dashboard.png) |
+| *Landing page* | *Dashboard* |
+
+| | |
+| --- | --- |
+| ![Editor with live preview](docs/screenshots/editor.png) | <img src="docs/screenshots/mobile.png" alt="Resume builder on a phone" width="220"> |
+| *Editor with live preview* | *On a phone* |
+
 ## Features
 
 ### Core Functionality
