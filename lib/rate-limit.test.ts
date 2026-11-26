@@ -1,13 +1,15 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 const rpcMock = vi.fn()
+const createClientMock = vi.fn((..._args: unknown[]) => ({ rpc: rpcMock }))
 vi.mock("@supabase/supabase-js", () => ({
-  createClient: () => ({ rpc: rpcMock }),
+  createClient: (...args: unknown[]) => createClientMock(...args),
 }))
 
 afterEach(() => {
   vi.clearAllMocks()
   vi.resetModules()
+  vi.unstubAllEnvs()
 })
 
 describe("checkRateLimit", () => {
@@ -36,5 +38,19 @@ describe("checkRateLimit", () => {
     const result = await checkRateLimit("some-key", 10)
 
     expect(result.allowed).toBe(true)
+  })
+
+  it.each([
+    ["service-key", "service-key"],
+    ["", "anon-key"],
+  ])("with service role key %j, connects using %s", async (serviceKey, expected) => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "anon-key")
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", serviceKey)
+    rpcMock.mockResolvedValue({ data: [{ allowed: true, retry_after_seconds: 0 }], error: null })
+    const { checkRateLimit } = await import("./rate-limit")
+
+    await checkRateLimit("some-key", 10)
+
+    expect(createClientMock.mock.calls[0][1]).toBe(expected)
   })
 })
