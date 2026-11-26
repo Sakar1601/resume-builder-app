@@ -10,7 +10,11 @@ let supabase: SupabaseClient | null = null
 
 function getSupabase(): SupabaseClient {
   if (!supabase) {
-    supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+    // check_rate_limit is callable only by the service role (db/migrations/008), so
+    // visitors cannot reset or exhaust counters with the public anon key. The anon
+    // fallback covers environments where that migration has not been applied.
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, key, { auth: { persistSession: false } })
   }
   return supabase
 }

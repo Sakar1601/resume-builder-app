@@ -123,8 +123,9 @@ Create a `.env.local` file with:
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 GROQ_API_KEY=your-groq-api-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 ```
-`.env.local` is gitignored — never commit it. The app doesn't use the Supabase service-role key; all database access goes through the anon key and is enforced by Postgres Row Level Security.
+`.env.local` is gitignored — never commit it. User data is accessed through the anon key and protected by Postgres Row Level Security. The service-role key is used only by the server-side rate limiter (`lib/rate-limit.ts`); never give it a `NEXT_PUBLIC_` name.
 
 4. Set up the database:
 Run the SQL files in `db/migrations/` in order:
@@ -134,6 +135,8 @@ Run the SQL files in `db/migrations/` in order:
 - `004_create_profile_trigger.sql`
 - `005_add_data_column_to_resumes.sql`
 - `006_drop_unused_resume_sections.sql` — drops `resume_sections`; the app stores resume content in `resumes.data` (jsonb) instead, so this table went unused after migration 005.
+- `007_create_rate_limit_function.sql`
+- `008_restrict_rate_limit_function.sql` — only the service role may call the rate limiter; set `SUPABASE_SERVICE_ROLE_KEY` before running it.
 
 5. Start the development server:
 ```bash
